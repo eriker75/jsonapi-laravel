@@ -1,0 +1,41 @@
+# Directorios de dependencias
+/vendor/
+/node_modules/
+
+# Archivos y directorios de configuración y entorno
+#.env
+.env.example
+.dockerignore
+.git/
+.gitignore
+.docker/
+
+# Directorios y archivos de almacenamiento y cache
+storage/logs/
+storage/framework/
+bootstrap/cache/
+
+# Directorios y archivos de pruebas y documentación
+phpunit.xml
+/tests/
+
+# Archivos y directorios de editor/IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos y directorios específicos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Directorios de salida de compilación
+/public/hot
+/public/storage
+/storage/*.key
+/npm-debug.log
+/yarn-error.log
+
+# Otros archivos y directorios que no deberían estar en la imagen
+/README.md
+/LICENSE.md

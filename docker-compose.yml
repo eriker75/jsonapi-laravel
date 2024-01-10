@@ -1,0 +1,146 @@
+version: '3'
+services:
+  #PHP Service
+  app:
+    image: laravel-app
+    container_name: app
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - app-network
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+      # - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: always
+    depends_on:
+      - app
+    links:
+      - db
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app-network
+
+  # Laravel Worker Service
+#worker:
+##image: laravel-app
+##container_name: worker
+##command: "php artisan queue:work"
+##restart: always
+##volumes:
+###- .:/var/www
+###- /var/www/vendor
+###- /var/www/node_modules
+##depends_on:
+###- app
+###- redis
+##networks:
+###- app-network
+
+  # Laravel Scheduler Service
+#cron:
+##image: laravel-app
+##container_name: cron
+##command: "php artisan schedule:work"
+##restart: always
+##volumes:
+###- .:/var/www
+###- /var/www/vendor
+###- /var/www/node_modules
+##depends_on:
+###- app
+###- redis
+##networks:
+###- app-network
+
+  #MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  #phpmyadmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - app-network
+
+  #Redis Service
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  #Redis Commander
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+
+  #Mailhog Service
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    external: false
+  redisdata:
+    external: false
+
